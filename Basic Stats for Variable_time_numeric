@@ -1,4 +1,0 @@
-#this file is to do basic statistics for variable conversion and coersion.
-data_s1 <- read.csv("/Users/rjx/studygarden/stats/GambleRC.csv')
-colnames(data_s1) <- c("Predicted Score","Simulated Score")
-#Now use head()to see the first several lines of data
