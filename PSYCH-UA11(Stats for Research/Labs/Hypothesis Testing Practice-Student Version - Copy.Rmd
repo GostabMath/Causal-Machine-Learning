@@ -1,0 +1,247 @@
+---
+title: "Introduction to Hypothesis Testing and statistical Inference"
+author: "Gostab"
+date: "2/11/20"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(magrittr)
+library(knitr)
+library(utils)
+library(ggplot2)
+```
+
+## Start with Simulated Data
+
+As we discussed in the class and extra notes I wrote. When doing hypothesis testing, we always have some assumptions brought to our data. For example, doing sample t test, we usually think the Population the data was sampling follows a normal distribution with mean value $\mu$ and standard deviation $\sigma$.
+
+For example, we might have a sample data like what you have been provided in the Assignment 3
+
+I **did some modifications to the data so that it will not be exactly as same** as that in the document.
+
+Now we created the artificial data and visualize it.
+
+```{r}
+da3 <-c(50,51,46,49,40,58,45,47,46,53)
+hist(da3,freq = TRUE)
+```
+
+#### A. One-sample t-test($\sigma$ is known)
+
+Say, we would like to test if the population $\mu$ is 50 or not. It is easy to show that if the population mean is 50, that is $X_i\sim N(50,\sigma^2)$. By applying the Law of Large number, we know the expectation of sample mean will also be 50 as the number of sampling increases.
+
+Therefore, $E(\bar X)=\mu \rightarrow X_i-50\sim N(0,\sigma^2)\rightarrow\frac{X_i-\bar X}{\frac{\sigma}{\sqrt{}n}}\sim N(0,1)$
+
+As $E(X-\mu)=0=E(\bar X -\mu)=0\rightarrow \frac{\bar X-\mu}{\frac{\sigma}{\sqrt{}n}}\sim N(0,1)$
+
+So just consider the test statistics : $Z\sim N(0,1)$ if the population standard deviation is known.
+
+So we can use this test statistics to formalize our hypothesis testing, that is, when null hypothesis is true(meaning the sample mean will be converging to the population mean **50** ), the test statistics should be a $Z$ distribution as what we have proposed. We should reject a larger $T$ value compared to the theoretical $T$ value in a null distribution.
+
+Now we can finish the hypothesis using $Z$ distribution **only when** $\sigma$ **is known**
+
+**Try any codes to finish our hypothesis testing:**
+
+We know $\sigma=1$ of the population and the sample mean is 52, n=10
+
+```{r}
+#calculate Z
+m1 = 50
+mbar = 52
+sigma1 = 1
+Z1 <- (mbar-m1)/10
+Z1
+#calculate the probability P(T statistics>T_statistics_observed)"p value"
+p1 <- pnorm(0.2,0,1,lower.tail = FALSE)
+p1
+```
+
+```{r}
+curve(dnorm, -3.5, 3.5, lwd=2, axes = FALSE, xlab = "", ylab = "")
+axis(1, at = -3:3, labels = c("-3", "-2", "-1", "mean", "1", "2", "3"))
+abline(v=0.2,col= "red",lwd=3, lty=2)
+```
+
+#### A. One-sample t-test($\sigma$ is unknown)
+
+Since $\sigma$ is unknown, a basic idea is to use $S^2$ to estimate the variance of population:
+
+$E[S^2]=E[\frac{1}{n-1}(\sum\limits_{i=1}^{n} X_i^2 + n\bar X^2)]=\sigma^2$
+
+We will consider the similar test statistics $T = \frac{\sqrt n\bar X}{S}=\frac{\frac{\sqrt n\bar X}{\sigma}}{\frac{S}{\sigma}}$. (1)
+
+See it seems similar to a standard Z test but since we don't know the population $\sigma^2$ we therefore should find a transformation from $S^2$ to $\sigma^2$.
+
+The transformed Test statistics follows a $t$ distribution denoted by $T\sim t_{n-1}$.
+
+**An interesting fact is the relationship between** $t$ **distribution and standard normal distribution. From (1),**
+
+**when n is large enough, for example** $\infty$**, we will get** $S^2\rightarrow\sigma^2$**, which causes the denominator** $\rightarrow 1$**, so the** $t$ **distribution becomes a normal distribution as the sample size does not affect the shape of the t curve.**
+
+**Try any codes to finish our hypothesis testing for the data**
+
+```{r}
+m2 = 50
+mbar2 = mean(da3)
+sigma2 = (var(da3)/10)^0.5
+T1 <- (mbar2-m2)/sigma2
+T1
+```
+
+```{r}
+curve(dt(x, df=9), from=-5, to=5)
+abline(v= T1,col= "blue",lwd=3, lty=2)
+```
+
+#### C. Two sample t Test(composite)
+
+#### C.1: $\sigma$ is known
+
+Since we have one sample testing in mind, it is more straightforward for us to construct a 2 sample $t$ test.
+
+The logic is that we construct a one sample test from two samples:
+
+We have values from two $i.i.d$ samples and we are interested in the difference between the twosamples. The formal notation is:
+
+$\mu_{X-Y}=\mu_X -\mu_Y;
+\mu_{\bar X-\bar Y}=\mu_\bar X -\mu_\bar Y$ by linearity. $\sigma_{\bar X-\bar Y}^2=Var(\bar X-\bar Y)=Var(\bar X)-Var(\bar Y)+0=Var(\frac{X_1+X_2,..+X_m}{m})-
+
+Var(\frac{Y_1+Y_2,..+Y_n}{n})
+
+=\frac{\sigma_1^2}{m}+
+\frac{\sigma_2^2}{n}$
+
+We therefore have a new Test statistics $T = \frac{\bar X-\bar Y}{\sqrt
+
+\frac{\sigma_1^2}{m}+
+\frac{\sigma_2^2}{n}
+
+} \sim N(0,1)$ **only if the population** $\sigma$ **is known.**
+
+#### C.2: $\sigma$ is unknown
+
+Use the same step to estimate $\sigma$ through $S_p^2\rightarrow Pooled Variance$
+
+![](images/Variance.png)
+
+## Real Data and application of Hypothesis Testing
+
+```{r Absenteeism_data}
+Absenteeism_data <- read.csv("MFGEmployees4.csv") 
+#You may use your currect working directory as we are using different PCs.
+# SETTING THE CURRENT ENVIRONMENT
+
+head(Absenteeism_data)
+
+View(Absenteeism_data)
+summary(Absenteeism_data)
+Absenteeism_data %>% group_by(BusinessUnit)%>% summarize(meanabsenthour = mean(AbsentHours)) %>% knitr::kable(,caption = "Mean number of Absent Hours by Business Unit")
+  
+
+```
+
+You can also embed plots, for example here is a plot of the mean number of Absent hours by the variable business unit. Business unit is a categorical variable with two values, Stores or Head Office.
+
+```{r Plot the data, echo = FALSE}
+ggplot(data=Absenteeism_data, mapping=aes(BusinessUnit,AbsentHours)) + geom_bar(stat="summary", fun=mean,width = 0.25, color = "blue", fill="blue")
+```
+
+Note that you can `echo = FALSE` parameter to the code chunk to prevent printing of the R code that generated the plot.
+
+First Assignment for the course.
+
+```{r}
+addzscore <- data.frame(sapply(Absenteeism_data %>% dplyr::select(Age:AbsentHours), function(x){(x-mean(x))/sd(x)}))
+Absenteeism_data <- cbind.data.frame(Absenteeism_data,addzscore)
+colnames(Absenteeism_data)[c(14:16)] <- c("zage", 'zlengthservice','zabsenthours')
+Absenteeism_data <- Absenteeism_data %>% dplyr::select(c(1:16))
+```
+
+```{r}
+head(addzscore)
+```
+
+```{r}
+head(Absenteeism_data[c(14:16)])
+```
+
+```{r}
+t.test(Absenteeism_data$AbsentHours, mu= 60) 
+n<- nrow(Absenteeism_data) 
+power.t.test(n=n,delta= mean(Absenteeism_data$AbsentHours)-60,sd=sd(Absenteeism_data$AbsentHours),sig.level=0.05, type="one.sample",alternative="two.sided",strict = TRUE)
+
+
+```
+
+```{r}
+t.test(Absenteeism_data$AbsentHours ~ Absenteeism_data$BusinessUnit, var.equal = TRUE) 
+meandiff <- 47.06009-61.58543 
+power.t.test(n=n,delta=meandiff, sd=sd(Absenteeism_data$AbsentHours),sig.level=0.05, type="two.sample",alternative="two.sided",strict = TRUE)
+```
+
+```{r}
+t.test(Absenteeism_data$LengthService ~ Absenteeism_data$Gender, var.equal = TRUE) 
+s <- Absenteeism_data %>% group_by(Gender)%>% summarise(meanlth = mean(LengthService))
+m_diff_2 <- 4.779576-4.78167
+power.t.test(n=n,delta=m_diff_2, sd=sd(Absenteeism_data$LengthService),sig.level=0.05, type="two.sample",alternative="two.sided",strict = TRUE)
+```
+
+```{r}
+t.test(Absenteeism_data$LengthService ~ Absenteeism_data$BusinessUnit, var.equal = TRUE) 
+s_2 <- Absenteeism_data %>% group_by(BusinessUnit)%>% summarise(meanlthg = mean(LengthService))
+m_diff_3 <- 14.705856 - 4.572611
+power.t.test(n=n,delta=m_diff_3, sd=sd(Absenteeism_data$LengthService),sig.level=0.05, type="two.sample",alternative="two.sided",strict = TRUE)
+```
+
+```{r}
+library(gmodels)
+library(car)
+```
+
+```{r}
+ggplot(data=Absenteeism_data, mapping=aes(Division,LengthService)) + geom_bar(aes(color=Division, fill=Division),stat="summary", fun=mean,width = 0.25)+ theme(axis.text.x=element_blank())+scale_y_continuous(expand = c(0, 0), limits = c(0, 45))
+
+anovatable1 <- aov(LengthService ~ Division, data=Absenteeism_data) #calculates anova
+
+summary(anovatable1) # displays ANOVA table
+
+xs<-TukeyHSD(anovatable1) # where fit comes from aov()
+
+print(xs)
+```
+
+```{r}
+result = leveneTest(LengthService ~ Division, Absenteeism_data)
+result
+```
+
+```{r}
+
+# this code plots the mean length of service by divison
+ggplot(data=Absenteeism_data, mapping=aes(Division,AbsentHours)) + geom_bar(aes(color=Division, fill=Division),stat="summary", fun=mean,width = 0.25)+ theme(axis.text.x=element_blank())+scale_y_continuous(expand = c(0, 0), limits = c(0, 275))
+
+anovatable2 <- aov(AbsentHours ~ Division, data=Absenteeism_data) #calculates anova
+
+summary(anovatable1) # displays ANOVA table
+
+xs_2<-TukeyHSD(anovatable2) # where fit comes from aov()
+
+print(xs_2)
+max(Absenteeism_data$AbsentHours)
+```
+
+```{r}
+ggplot(Absenteeism_data, aes(x=AbsentHours, color=Division)) +
+  geom_histogram(fill="white", position="dodge")+
+  theme(legend.position="top") + facet_grid(rows = vars(Division), cols = vars(), scales = "free")
+```
+
+```{r}
+result_2 = leveneTest(AbsentHours ~ Division, Absenteeism_data)
+result_2
+```

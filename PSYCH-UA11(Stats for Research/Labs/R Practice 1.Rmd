@@ -1,0 +1,183 @@
+---
+---
+---
+
+------------------------------------------------------------------------
+
+# **Example of R Practice-Week 3 Section 003**
+
+**This practice will cover all needed function/command/skills in your assignment 1**
+
+As we discussed in the class, you will learn how to create a fake sample data from a specified population
+
+Key words and commands:
+
+**mean() var() summary() runif() ifelse()**
+
+By Gostab
+
+output: pdf_document
+
+```{r}
+#you can also use my complate and redact it. 
+
+
+
+
+```
+
+/
+
+## Objective
+
+## R Packages
+
+You will need to use an R package that you may not already have installed
+
+Here are some basic packages you may need-just examples I usually use
+
+More advanced packages that is specific to a talked method will be introduced later
+
+```{r, message=FALSE}
+# These are the packages I used
+
+library(arm)
+library(dplyr)
+library(ggplot2)
+library(data.table)
+library(Hmisc)
+library(survival)
+```
+
+## Problem Statement: Create Data
+
+We will discuss some similar questions that will be tested in your Data Assignment; The problems are the same but won't be exactly the same.
+
+My style is that commonly harder questions than your assignment. But I will fully go over all materials.
+
+#### Question 1: Load the data and choose confounders(Variables)
+
+Now you are a researcher, you need to guess the distribution and shape of a specific kind of population
+
+You want to create a data set that might corresponds to your imagination.
+
+Create a data set that represents students' score and meets the following requirements:
+
+1.  the score will not exceed 100, and no lower than 0
+
+```{r}
+score_1 <- runif(1000, min = 45, max = 100)
+max(score_1); min(score_1);mean(score_1);(var(score_1))^0.5
+#summary(score_1)
+score_1
+typeof(score_1)
+score_1 <- as.vector(score_1)
+score_1
+```
+
+\_
+
+1.  There is a cut off 60 for which students are considered pass the exam
+2.  If the student passed the exam, there should be letter grade P, otherwise F.
+3.  If you want to control of grade-level proportion, any insights? -Using sample()
+
+```{r}
+score <- rnorm(1000,78,7.5)
+score
+min(score);max(score)
+
+hist(score,nclass=30,freq = FALSE)
+
+lg <- ifelse(score >= 60, "P", "F")
+lg
+
+#mean(score)
+#summary(score)
+```
+
+```{r}
+cate = sample(c('High','average','low'), 1000, replace = T, prob=c(0.25,0.6,0.15))
+cate
+
+score_c = case_when(
+  (C=='High')~ rnorm(1,93,1.5),
+  (C=='average')~rnorm(1,85,2.5),
+  (C=='low')~rnorm(1,65,3.5)
+)
+dat <- data.frame(Gradelevel = cate, Score = score_c, status = lg)
+mean(score_c); var(score_c)
+#hist(score_c,nclass=30,freq = FALSE)
+
+
+```
+
+```{r}
+score_3 <- sample(1:100, 1000, replace = TRUE)
+score_3 <- as.vector(score_3)
+typeof(score_3)
+score_3
+db <- cbind.data.frame(prescore = floor(score_1),score)
+```
+
+```{r}
+summary(db)
+
+```
+
+#### Hints for your Data Assignment.
+
+how to put two diagrams into one graph and how to analyze them
+
+As you have learnt in our last class, you can use hist() function to create the over simplifed charts.
+
+Now you may be required to build two-imbeded diagrams and compare their properties.
+
+The basic idea of ggplot is to create the plots using grammar of graphics:
+
+data + scale
+
+```{r}
+ggplot(data = db, aes(x = prescore, y = score))  + geom_point()
+# now we want to make the plot reaosnable, adding the heading, x-y axis and other information.
+visual <- ggplot(data = db, aes(x = prescore, y = score))  + geom_point(color = "red")
+visual
+```
+
+#### Now we will use a more reasonable data set that can display some correlations that are more similar to your assignment.
+
+Imagine you want to know if a special program has any effects on studnets' achievement. You got the data before and after the training.
+
+We create some normal sample from the population that can represent students' score.
+
+We still use our first example:
+
+```{r}
+prescore_1 <- sample(1:100, 100, replace = TRUE,)
+postscore <- rnorm(100,0.8*prescore_1 + 5, 3) + rnorm(1,0,1)
+db2 <- data.frame(prescore = prescore_1, postscore = postscore)
+visual <- ggplot(data = db2, aes(x = prescore_1, y = postscore))  + geom_point(color = "red") + geom_line(linetype = "dashed")
+visual
+```
+
+#### Now we are exploring the correlation from the data. Actually. you have been given data in your homework and the linear relationship may not be perfect because we just use our artificial data.
+
+To get better practice, you may want to get your own function to calculate Pearson r
+
+```{r}
+
+cv <- cov(prescore_1,postscore)
+std <- as.vector(c(var(prescore_1),var(postscore)))
+std <- std^0.5
+
+pnr <- cv/(std[1]*std[2])
+
+test <- pnr == cor(prescore_1, postscore)
+test
+```
+
+#### or using summary()
+
+```{r}
+sum <- summary(data.frame(prescore_1,postscore))
+a1 <- as.vector(sum[1,1])
+```
