@@ -9,6 +9,6 @@
 
 - [Advanced Statistics for Research](https://github.com/GostabMath/Courses/tree/main/PSYCHUA11-Stats%20for%20Research)
 
-- [Engineering: Statistics for Data Science](https://github.com/GostabMath/Courses/tree/main/MGGY-6193(Engineering%20Stats%20and%20Data%20Science))
+- [Engineering: Statistics for Data Science](https://github.com/GostabMath/Courses/tree/main/MGGY-6193-Engineering%20Stats%20and%20Data%20Science)
 
-- [Introduction to Machine Learning](https://github.com/GostabMath/Courses/tree/main/PSYCH-GA2043(Introduction%20to%20ML))
+- [Introduction to Machine Learning](https://github.com/GostabMath/Courses/tree/main/PSYCHGA2043-Introduction%20to%20ML)
