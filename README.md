@@ -5,6 +5,8 @@
 
 ## Course Map
 
+*Special:Essnetials of Measurable Function and Probability*
+
 - [Basic Statistics for Behavioral Sciences](https://github.com/GostabMath/Courses/tree/main/PSYCH-10-Basic%20Stats)
 
 - [Advanced Statistics for Research](https://github.com/GostabMath/Courses/tree/main/PSYCHUA11-Stats%20for%20Research)
